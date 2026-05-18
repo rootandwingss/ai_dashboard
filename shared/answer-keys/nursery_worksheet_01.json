@@ -1,0 +1,43 @@
+{
+  "templateId": "nursery_worksheet_01",
+  "gradeLevel": "nursery",
+  "totalPages": 1,
+  "pages": [
+    {
+      "pageIndex": 0,
+      "questions": [
+        {
+          "id": "q1",
+          "type": 1,
+          "expectedAnswer": "B",
+          "boundingBox": { "x": 50, "y": 100, "w": 500, "h": 120 },
+          "meta": {
+            "options": [
+              { "label": "A", "bbox": { "x": 50, "y": 100, "w": 100, "h": 100 } },
+              { "label": "B", "bbox": { "x": 170, "y": 100, "w": 100, "h": 100 } },
+              { "label": "C", "bbox": { "x": 290, "y": 100, "w": 100, "h": 100 } }
+            ]
+          }
+        },
+        {
+          "id": "q2",
+          "type": 4,
+          "expectedAnswer": "red",
+          "boundingBox": { "x": 50, "y": 250, "w": 400, "h": 300 },
+          "meta": {
+            "region_polygon": [[60,260],[440,260],[440,540],[60,540]],
+            "expected_hsv_lower": [0, 100, 100],
+            "expected_hsv_upper": [10, 255, 255]
+          }
+        },
+        {
+          "id": "q3",
+          "type": 8,
+          "expectedAnswer": "dog",
+          "boundingBox": { "x": 50, "y": 580, "w": 300, "h": 100 },
+          "meta": {}
+        }
+      ]
+    }
+  ]
+}

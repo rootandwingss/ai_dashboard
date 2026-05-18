@@ -1,0 +1,107 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Schools ───────────────────────────────────────────────
+model School {
+  id        String    @id @default(cuid())
+  name      String
+  location  String?
+  createdAt DateTime  @default(now()) @map("created_at")
+  
+  students  Student[]
+  
+  @@map("schools")
+}
+
+// ─── Students ──────────────────────────────────────────────
+model Student {
+  id          String   @id @default(cuid())
+  name        String
+  grade       String   // nursery | lkg | ukg
+  schoolId    String   @map("school_id")
+  studentCode String?  @unique @map("student_code") // e.g., "STU001"
+  createdAt   DateTime @default(now()) @map("created_at")
+  
+  school      School       @relation(fields: [schoolId], references: [id])
+  submissions Submission[]
+  
+  @@map("students")
+}
+
+// ─── Template Pages ─────────────────────────────────────────
+model TemplatePage {
+  id                  String @id @default(cuid())
+  templateId          String @map("template_id") // e.g., "nursery_worksheet_01"
+  pageNumber          Int    @map("page_number")
+  expectedQuestionType Int   @map("expected_question_type") // 1-14
+  description         String?
+  
+  @@unique([templateId, pageNumber])
+  @@map("template_pages")
+}
+
+// ─── Submissions ───────────────────────────────────────────
+model Submission {
+  id            String    @id @default(cuid())
+  studentId     String    @map("student_id")
+  pageNumber    Int       @map("page_number")
+  templateId    String    @map("template_id")
+  fileUrl       String?   @map("file_url")
+  status        String    @default("Pending") // Pending | AI_Passed | Human_Review | Completed
+  aiConfidence  Float?    @map("ai_confidence")
+  totalScore    Float?    @map("total_score")
+  maxScore      Float?    @map("max_score")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+  
+  student       Student        @relation(fields: [studentId], references: [id])
+  questions     QuestionResult[]
+  exceptions    Exception[]
+  
+  @@unique([studentId, pageNumber]) // No-repeat: one page per student
+  @@map("submissions")
+}
+
+// ─── Question Results ──────────────────────────────────────
+model QuestionResult {
+  id            String   @id @default(cuid())
+  submissionId  String   @map("submission_id")
+  questionId    String   @map("question_id")
+  questionType  Int      @map("question_type")
+  engine        String   // A | B | C | D
+  score         Float
+  maxScore      Float    @default(1) @map("max_score")
+  confidence    Float
+  details       Json?
+  createdAt     DateTime @default(now()) @map("created_at")
+  
+  submission Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  
+  @@map("question_results")
+}
+
+// ─── Exceptions ─────────────────────────────────────────────
+model Exception {
+  id            String    @id @default(cuid())
+  submissionId  String    @map("submission_id")
+  questionId    String    @map("question_id")
+  croppedImgUrl String?   @map("cropped_img_url")
+  ocrText       String?   @map("ocr_text")
+  expected      String?
+  confidence    Float
+  engine        String
+  status        String    @default("pending")
+  resolvedAt    DateTime? @map("resolved_at")
+  scoreAwarded  Float?    @map("score_awarded")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  
+  submission Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  
+  @@map("exceptions")
+}
