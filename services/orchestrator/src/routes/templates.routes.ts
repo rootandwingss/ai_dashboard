@@ -190,10 +190,10 @@ function getNur1TemplateConfig(id: string) {
       questionType: 8,
       description: "Q1. Count and write the alphabet",
       questions: [
-        { id: "q1_1", type: 8, expectedAnswer: "B", boundingBox: { x: 760, y: 830, w: 160, h: 100 }, meta: {} },
-        { id: "q1_2", type: 8, expectedAnswer: "C", boundingBox: { x: 760, y: 400, w: 160, h: 100 }, meta: {} },
-        { id: "q1_3", type: 8, expectedAnswer: "D", boundingBox: { x: 760, y: 670, w: 160, h: 100 }, meta: {} },
-        { id: "q1_4", type: 8, expectedAnswer: "A", boundingBox: { x: 760, y: 1050, w: 160, h: 100 }, meta: {} },
+        { id: "q1_1", type: 8, expectedAnswer: "C", boundingBox: { x: 780, y: 400, w: 200, h: 150 }, meta: {} },
+        { id: "q1_2", type: 8, expectedAnswer: "D", boundingBox: { x: 780, y: 720, w: 200, h: 150 }, meta: {} },
+        { id: "q1_3", type: 8, expectedAnswer: "B", boundingBox: { x: 780, y: 1050, w: 200, h: 150 }, meta: {} },
+        { id: "q1_4", type: 8, expectedAnswer: "A", boundingBox: { x: 800, y: 1390, w: 200, h: 170 }, meta: {} },
       ],
     },
     {

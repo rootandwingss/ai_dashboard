@@ -25,3 +25,7 @@ Thumbs.db
 # Storage / Cache
 minio_data/
 uploads/
+
+# Local custom folders to ignore
+services/vision/data/
+scratch/

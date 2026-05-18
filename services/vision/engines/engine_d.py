@@ -86,34 +86,49 @@ class EngineD(BaseEngine):
     ) -> Dict[str, Any]:
         """
         Q8: Write a Letter / Word / Number.
-        Apply mirror-letter rules for Nursery. Use fuzzy matching for tolerance.
+        Apply custom local Deep Learning model for single character recognition!
         """
-        ocr_result = self._ocr_image(image, expected)
-        ocr_text = ocr_result["text"].strip().lower()
-        confidence = ocr_result["confidence"]
         expected_clean = expected.strip().lower()
-
-        details: Dict[str, Any] = {
-            "ocr_raw": ocr_result["text"],
-            "expected": expected,
-            "mirror_rule_applied": False,
-            "fuzzy_accepted": False,
-        }
-
-        # Check for fallback grading simulation override
-        if "mock_score" in ocr_result:
-            return {"score": ocr_result["mock_score"], "max_score": 1.0, "confidence": confidence, "details": details}
+        
+        # Check if we are expecting a single letter (our CNN is designed for A-Z)
+        if len(expected_clean) == 1 and expected_clean.isalpha():
+            from ml.inference import predict_letter
+            predicted_letter, confidence = predict_letter(image)
+            ocr_text = predicted_letter.lower()
+            
+            details: Dict[str, Any] = {
+                "ml_model_used": "custom_cnn",
+                "ocr_raw": predicted_letter,
+                "expected": expected,
+                "mirror_rule_applied": False,
+                "fuzzy_accepted": False,
+            }
+        else:
+            # Fallback to Google Cloud Vision for multi-word or numbers
+            ocr_result = self._ocr_image(image, expected)
+            ocr_text = ocr_result["text"].strip().lower()
+            confidence = ocr_result["confidence"]
+            
+            details: Dict[str, Any] = {
+                "ml_model_used": "gcv_api",
+                "ocr_raw": ocr_result["text"],
+                "expected": expected,
+                "mirror_rule_applied": False,
+                "fuzzy_accepted": False,
+            }
+            if "mock_score" in ocr_result:
+                return {"score": ocr_result["mock_score"], "max_score": 1.0, "confidence": confidence, "details": details}
 
         # Exact match
         if ocr_text == expected_clean:
-            return {"score": 1.0, "max_score": 1.0, "confidence": confidence, "details": details}
+            return {"score": 1.0, "max_score": 1.0, "confidence": float(confidence), "details": details}
 
         # Mirror-letter rule (Nursery only)
         if thresholds.get("accept_mirror_letters"):
             mirrored = apply_mirror_swap(ocr_text)
             if mirrored == expected_clean:
                 details["mirror_rule_applied"] = True
-                return {"score": 1.0, "max_score": 1.0, "confidence": confidence, "details": details}
+                return {"score": 1.0, "max_score": 1.0, "confidence": float(confidence), "details": details}
 
         # Fuzzy matching
         fuzzy_threshold = thresholds.get("fuzzy_match_threshold", 85)
@@ -123,10 +138,10 @@ class EngineD(BaseEngine):
             details["fuzzy_accepted"] = True
             details["fuzzy_ratio"] = ratio
             score = 0.8 if ratio < 95 else 1.0
-            return {"score": score, "max_score": 1.0, "confidence": confidence, "details": details}
+            return {"score": score, "max_score": 1.0, "confidence": float(confidence), "details": details}
 
         details["fuzzy_ratio"] = ratio
-        return {"score": 0.0, "max_score": 1.0, "confidence": confidence, "details": details}
+        return {"score": 0.0, "max_score": 1.0, "confidence": float(confidence), "details": details}
 
     def _grade_fill_missing(
         self, image: np.ndarray, expected: str, grade_level: str,
